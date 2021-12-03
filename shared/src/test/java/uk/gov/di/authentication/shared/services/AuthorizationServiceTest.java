@@ -11,7 +11,6 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
-import net.minidev.json.JSONArray;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.di.authentication.sharedtest.helper.JsonArrayHelper.jsonArrayOf;
 
 class AuthorizationServiceTest {
 
@@ -119,9 +119,6 @@ class AuthorizationServiceTest {
         State state = new State();
         Scope scope = new Scope();
         scope.add(OIDCScopeValue.OPENID);
-        JSONArray jsonArray = new JSONArray();
-        jsonArray.add("Pl.Cl.Cm");
-        jsonArray.add("Pl.Cl");
         when(dynamoClientService.getClient(clientID.toString()))
                 .thenReturn(
                         Optional.of(
@@ -134,7 +131,7 @@ class AuthorizationServiceTest {
                         REDIRECT_URI.toString(),
                         responseType,
                         scope,
-                        jsonArray,
+                        jsonArrayOf("Pl.Cl.Cm", "Pl.Cl"),
                         state,
                         new Nonce());
         Optional<ErrorObject> errorObject = authorizationService.validateAuthRequest(authRequest);
@@ -148,9 +145,6 @@ class AuthorizationServiceTest {
         State state = new State();
         Scope scope = new Scope();
         scope.add(OIDCScopeValue.OPENID);
-        JSONArray jsonArray = new JSONArray();
-        jsonArray.add("Cm.Cl.Pl");
-        jsonArray.add("Pl.Cl");
         when(dynamoClientService.getClient(clientID.toString()))
                 .thenReturn(
                         Optional.of(
@@ -163,7 +157,7 @@ class AuthorizationServiceTest {
                         REDIRECT_URI.toString(),
                         responseType,
                         scope,
-                        jsonArray,
+                        jsonArrayOf("Cm.Cl.Pl", "Pl.Cl"),
                         state,
                         new Nonce());
         Optional<ErrorObject> errorObject = authorizationService.validateAuthRequest(authRequest);
@@ -352,14 +346,12 @@ class AuthorizationServiceTest {
                         Optional.of(
                                 generateClientRegistry(
                                         REDIRECT_URI.toString(), clientID.toString())));
-        JSONArray jsonArray = new JSONArray();
-        jsonArray.add("Cm");
         AuthenticationRequest authRequest =
                 new AuthenticationRequest.Builder(
                                 responseType, scope, new ClientID(clientID), REDIRECT_URI)
                         .state(new State())
                         .nonce(new Nonce())
-                        .customParameter("vtr", jsonArray.toJSONString())
+                        .customParameter("vtr", jsonArrayOf("Cm"))
                         .build();
         Optional<ErrorObject> errorObject = authorizationService.validateAuthRequest(authRequest);
 
@@ -460,13 +452,16 @@ class AuthorizationServiceTest {
 
     private AuthenticationRequest generateAuthRequest(
             ClientID clientID, String redirectUri, ResponseType responseType, Scope scope) {
-        JSONArray jsonArray = new JSONArray();
-        jsonArray.add("Cl.Cm");
-        jsonArray.add("Cl");
         State state = new State();
         Nonce nonce = new Nonce();
         return generateAuthRequest(
-                clientID, redirectUri, responseType, scope, jsonArray, state, nonce);
+                clientID,
+                redirectUri,
+                responseType,
+                scope,
+                jsonArrayOf("Cl.Cm", "Cl"),
+                state,
+                nonce);
     }
 
     private AuthenticationRequest generateAuthRequest(
@@ -474,14 +469,14 @@ class AuthorizationServiceTest {
             String redirectUri,
             ResponseType responseType,
             Scope scope,
-            JSONArray jsonArray,
+            String jsonArray,
             State state,
             Nonce nonce) {
         return new AuthenticationRequest.Builder(
                         responseType, scope, new ClientID(clientID), URI.create(redirectUri))
                 .state(state)
                 .nonce(new Nonce())
-                .customParameter("vtr", jsonArray.toJSONString())
+                .customParameter("vtr", jsonArray)
                 .build();
     }
 }
