@@ -105,7 +105,8 @@ public class TokenService {
         AccessToken accessToken =
                 generateAndStoreAccessToken(
                         clientID, internalSubject, scopesForToken, publicSubject);
-        AccessTokenHash accessTokenHash = AccessTokenHash.compute(accessToken, TOKEN_ALGORITHM);
+        AccessTokenHash accessTokenHash =
+                AccessTokenHash.compute(accessToken, TOKEN_ALGORITHM, null);
         SignedJWT idToken =
                 generateIDToken(
                         clientID, publicSubject, additionalTokenClaims, accessTokenHash, vot);

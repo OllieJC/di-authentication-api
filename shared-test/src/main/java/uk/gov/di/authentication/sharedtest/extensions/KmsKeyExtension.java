@@ -5,8 +5,8 @@ import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.kms.model.CreateAliasRequest;
 import com.amazonaws.services.kms.model.CreateKeyRequest;
-import com.amazonaws.services.kms.model.CustomerMasterKeySpec;
 import com.amazonaws.services.kms.model.DescribeKeyRequest;
+import com.amazonaws.services.kms.model.KeySpec;
 import com.amazonaws.services.kms.model.NotFoundException;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -47,9 +47,7 @@ public class KmsKeyExtension extends BaseAwsResourceExtension implements BeforeA
 
     protected void createTokenSigningKey(String keyAlias) {
         CreateKeyRequest keyRequest =
-                new CreateKeyRequest()
-                        .withCustomerMasterKeySpec(CustomerMasterKeySpec.ECC_NIST_P256)
-                        .withKeyUsage(SIGN_VERIFY);
+                new CreateKeyRequest().withKeySpec(KeySpec.ECC_NIST_P256).withKeyUsage(SIGN_VERIFY);
 
         var keyResponse = kms.createKey(keyRequest);
 
